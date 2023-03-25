@@ -37,9 +37,9 @@ def predict(image):
 # Define Streamlit app
 def main():
     # Set app title
-    st.title('Cotton Pant Disease Detection')
+    st.title('Cotton Plant Disease Detection')
     # Set app description
-    st.write('This app helps you to detect whether a cotton pant is Healthy or Diseased.')
+    st.write('This app helps you to detect whether a cotton plant is healthy or diseased.')
     # Add file uploader for input image
     uploaded_file = st.file_uploader('Choose an image', type=['jpg', 'jpeg', 'png'])
     # If file uploaded, display it and make prediction
@@ -53,7 +53,12 @@ def main():
         # Display prediction
         st.write('Prediction: {} (confidence score: {:.2f})'.format(label, score))
         
+        # Provide instructions based on prediction
+        if label == 'diseased':
+            st.write('Your cotton plant appears to be diseased. To prevent the spread of disease, you should remove the infected plant and treat the soil. You can also consult a local agricultural expert for advice on how to prevent future outbreaks of disease.')
+        else:
+            st.write('Your cotton plant appears to be healthy. To keep it healthy, make sure to provide adequate water and fertilize regularly. You should also control pests and prune and train the plant to promote healthy growth. Harvest at the right time to ensure the highest quality fiber.')
+            
 # Run Streamlit app
 if __name__ == '__main__':
     main()
-

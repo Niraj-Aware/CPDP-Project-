@@ -40,6 +40,7 @@ def main():
     st.title('Cotton Plant Disease Detection')
     # Set app description
     st.write('This app helps you to detect whether a cotton plant is healthy or diseased.')
+     st.write('NOTE- This model only works on Cotton Plant. (With appropriate Image)')
     # Add file uploader for input image
     uploaded_file = st.file_uploader('Choose an image', type=['jpg', 'jpeg', 'png'])
     # If file uploaded, display it and make prediction

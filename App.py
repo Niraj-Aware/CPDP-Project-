@@ -7,7 +7,7 @@ import requests
 from io import BytesIO
 
 # Load pre-trained models
-leaf_model = tf.keras.models.load_model('v3_pred_cott_leaf.h5')
+leaf_model = tf.keras.models.load_model('v3_pred_cott_dis.h5')
 img_model = tf.keras.applications.ResNet50(weights='imagenet')
 
 # Define labels for prediction output

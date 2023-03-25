@@ -50,14 +50,17 @@ def main():
         st.image(image, caption='Uploaded Image', use_column_width=True)
         # Make prediction
         label, score = predict(image)
-        # Display prediction
-        st.write('Prediction: {} (confidence score: {:.2%})'.format(label, score))
-        
-        # Provide instructions based on prediction
-        if label == 'diseased':
-            st.write('Your cotton plant appears to be diseased. To prevent the spread of disease, you should remove the infected plant and treat the soil. You can also consult a local agricultural expert for advice on how to prevent future outbreaks of disease.')
+        # Check if the predicted label is either 'healthy' or 'diseased'
+        if label in labels:
+            # Display prediction
+            st.write('Prediction: {} (confidence score: {:.2%})'.format(label, score))
+            # Provide instructions based on prediction
+            if label == 'diseased':
+                st.write('Your cotton plant appears to be diseased. To prevent the spread of disease, you should remove the infected plant and treat the soil. You can also consult a local agricultural expert for advice on how to prevent future outbreaks of disease.')
+            else:
+                st.write('Your cotton plant appears to be healthy. To keep it healthy, make sure to provide adequate water and fertilize regularly. You should also control pests and prune and train the plant to promote healthy growth. Harvest at the right time to ensure the highest quality fiber.')
         else:
-            st.write('Your cotton plant appears to be healthy. To keep it healthy, make sure to provide adequate water and fertilize regularly. You should also control pests and prune and train the plant to promote healthy growth. Harvest at the right time to ensure the highest quality fiber.')
+            st.write('The uploaded image is not appropriate for this app.')
             
 # Run Streamlit app
 if __name__ == '__main__':

@@ -5,11 +5,14 @@ import numpy as np
 from PIL import Image
 import tensorflow as tf
 
-# Load pre-trained model
-model = tf.keras.models.load_model('v3_pred_cott_dis.h5')
+# Load pre-trained model for cotton plant leaf detection
+model_detect = tf.keras.models.load_model('v3_pred_cott_leaf.h5')
+
+# Load pre-trained model for cotton plant disease detection
+model_disease = tf.keras.models.load_model('v3_pred_cott_dis.h5')
 
 # Define labels for prediction output
-labels = ['diseased','healthy']
+labels_disease = ['diseased','healthy']
 
 # Define function to preprocess input image
 def preprocess_image(image):
@@ -24,13 +27,13 @@ def preprocess_image(image):
     return image
 
 # Define function to make prediction on input image
-def predict(image):
+def predict(image, model):
     # Preprocess input image
     image = preprocess_image(image)
     # Make prediction using pre-trained model
     prediction = model.predict(image)
     # Convert prediction from probabilities to label
-    label = labels[np.argmax(prediction)]
+    label = labels_disease[np.argmax(prediction)]
     # Return label and confidence score
     return label, prediction[0][np.argmax(prediction)]
 
@@ -45,26 +48,25 @@ def main():
     # If file uploaded, display it and make prediction
     if uploaded_file is not None:
         # Load image
-        try:
-            image = Image.open(uploaded_file)
-            # Check if image is of a cotton plant
-            if 'cotton' not in uploaded_file.name.lower():
-                st.error('Please upload an appropriate input image of a cotton plant.')
-            else:
-                # Display image
-                st.image(image, caption='Uploaded Image', use_column_width=True)
-                # Make prediction
-                label, score = predict(image)
-                # Display prediction
-                st.write('Prediction: {} (confidence score: {:.2f}%)'.format(label, score*100))
-                # Provide instructions based on prediction
-                if label == 'diseased':
-                    st.write('Your cotton plant appears to be diseased. To prevent the spread of disease, you should remove the infected plant and treat the soil. You can also consult a local agricultural expert for advice on how to prevent future outbreaks of disease.')
-                else:
-                    st.write('Your cotton plant appears to be healthy. To keep it healthy, make sure to provide adequate water and fertilize regularly. You should also control pests and prune and train the plant to promote healthy growth. Harvest at the right time to ensure the highest quality fiber.')
-        except:
-            st.error('Please upload an appropriate input image of a cotton plant.')
+        image = Image.open(uploaded_file)
+        # Detect if image contains cotton plant leaves or not
+        label_detect, _ = predict(image, model_detect)
+        if label_detect != 'cotton':
+            st.write('Error: Please upload an appropriate image of cotton plant leaves')
+            return
+        # Display image
+        st.image(image, caption='Uploaded Image', use_column_width=True)
+        # Make prediction for cotton plant disease
+        label_disease, score = predict(image, model_disease)
+        # Display prediction
+        st.write('Prediction: {} (confidence score: {:.2f})'.format(label_disease, score))
         
+        # Provide instructions based on prediction
+        if label_disease == 'diseased':
+            st.write('Your cotton plant appears to be diseased. To prevent the spread of disease, you should remove the infected plant and treat the soil. You can also consult a local agricultural expert for advice on how to prevent future outbreaks of disease.')
+        else:
+            st.write('Your cotton plant appears to be healthy. To keep it healthy, make sure to provide adequate water and fertilize regularly. You should also control pests and prune and train the plant to promote healthy growth. Harvest at the right time to ensure the highest quality fiber.')
+            
 # Run Streamlit app
 if __name__ == '__main__':
     main()

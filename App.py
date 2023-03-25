@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-
 import streamlit as st
 import requests
 from io import BytesIO
@@ -7,53 +6,60 @@ from PIL import Image
 import numpy as np
 import tensorflow as tf
 
+# Load pre-trained model
+model_detect = tf.keras.models.load_model('v3_pred_cott_dis.h5')
+
+# Define labels for prediction output
+labels = ['diseased', 'healthy']
+
 # Define function to preprocess input image
 def preprocess_image(image):
     # Resize image
-    image = image.resize((224,224))
+    image = image.resize((150, 150))
     # Convert image to numpy array
     image = np.array(image)
     # Scale pixel values to range [0, 1]
-    image = image / 255.0
+    image = image / 150
     # Expand dimensions to create batch of size 1
     image = np.expand_dims(image, axis=0)
     return image
 
 # Define function to make prediction on input image
-def predict(image_url):
-    # Fetch image from URL
-    response = requests.get(image_url)
-    image = Image.open(BytesIO(response.content))
+def predict(image):
     # Preprocess input image
     image = preprocess_image(image)
-    # Load pre-trained model
-    model = tf.keras.applications.MobileNetV2()
     # Make prediction using pre-trained model
-    predictions = model.predict(image)
-    # Decode predictions
-    decoded_predictions = tf.keras.applications.mobilenet_v2.decode_predictions(predictions, top=1)
-    # Return True if image contains a cotton leaf, else False
-    return decoded_predictions[0][0][1] == 'cotton'
+    prediction = model_detect.predict(image)
+    # Convert prediction from probabilities to label
+    label = labels[np.argmax(prediction)]
+    # Return label and confidence score
+    return label, prediction[0][np.argmax(prediction)]
 
 # Define Streamlit app
 def main():
     # Set app title
-    st.title('Cotton Plant Leaf Detection')
+    st.title('Cotton Plant Disease Detection')
     # Set app description
-    st.write('This app helps you to detect whether an uploaded image is a cotton plant leaf or not.')
-    # Add text input for image URL
-    image_url = st.text_input('Enter image URL:')
-    # If image URL provided, display it and make prediction
-    if image_url != '':
+    st.write('This app helps you to detect whether a cotton plant is healthy or diseased.')
+    # Add file uploader for input image
+    uploaded_file = st.file_uploader('Choose an image', type=['jpg', 'jpeg', 'png'])
+    # If file uploaded, display it and make prediction
+    if uploaded_file is not None:
+        # Load image
+        image = Image.open(uploaded_file)
+        # Display image
+        st.image(image, caption='Uploaded Image', use_column_width=True)
         # Make prediction
-        is_cotton = predict(image_url)
+        label, score = predict(image)
         # Display prediction
-        if is_cotton:
-            st.write('This is a cotton plant leaf.')
+        st.write('Prediction: {} (confidence score: {:.2f})'.format(label, score))
+        
+        # Provide instructions based on prediction
+        if label == 'diseased':
+            st.write('Your cotton plant appears to be diseased. To prevent the spread of disease, you should remove the infected plant and treat the soil. You can also consult a local agricultural expert for advice on how to prevent future outbreaks of disease.')
         else:
-            st.write('This is not a cotton plant leaf. Please try with an appropriate input image.')
+            st.write('Your cotton plant appears to be healthy. To keep it healthy, make sure to provide adequate water and fertilize regularly. You should also control pests and prune and train the plant to promote healthy growth. Harvest at the right time to ensure the highest quality fiber.')
 
 # Run Streamlit app
 if __name__ == '__main__':
     main()
-

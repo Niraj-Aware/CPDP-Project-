@@ -6,7 +6,7 @@ from PIL import Image
 import tensorflow as tf
 
 # Load pre-trained model for cotton plant leaf detection
-model_detect = tf.keras.models.load_model('v3_pred_cott_leaf.h5')
+model_detect = tf.keras.models.load_model('v3_pred_cott_dis.h5')
 
 # Load pre-trained model for cotton plant disease detection
 model_disease = tf.keras.models.load_model('v3_pred_cott_dis.h5')

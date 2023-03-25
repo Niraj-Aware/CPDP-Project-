@@ -23,16 +23,19 @@ def preprocess_image(image):
     image = np.expand_dims(image, axis=0)
     return image
 
-# Define function to make prediction on input image
-def predict(image):
+# Define function to check if uploaded image is a cotton plant leaf
+def is_cotton_plant(image):
     # Preprocess input image
     image = preprocess_image(image)
     # Make prediction using pre-trained model
     prediction = model.predict(image)
     # Convert prediction from probabilities to label
     label = labels[np.argmax(prediction)]
-    # Return label and confidence score
-    return label, prediction[0][np.argmax(prediction)]
+    # Check if label is 'diseased' or 'healthy'
+    if label in ['diseased', 'healthy']:
+        return True
+    else:
+        return False
 
 # Define Streamlit app
 def main():
@@ -46,19 +49,22 @@ def main():
     if uploaded_file is not None:
         # Load image
         image = Image.open(uploaded_file)
-        # Display image
-        st.image(image, caption='Uploaded Image', use_column_width=True)
-        # Make prediction
-        label, score = predict(image)
-        # Display prediction
-        st.write('Prediction: {} (confidence score: {:.2%})'.format(label, score))
-        
-        # Provide instructions based on prediction
-        if label == 'diseased':
-            st.write('Your cotton plant appears to be diseased. To prevent the spread of disease, you should remove the infected plant and treat the soil. You can also consult a local agricultural expert for advice on how to prevent future outbreaks of disease.')
+        # Check if image is a cotton plant leaf
+        if not is_cotton_plant(image):
+            st.error('Error: The uploaded image is not a cotton plant leaf. Please try again with an appropriate input image.')
         else:
-            st.write('Your cotton plant appears to be healthy. To keep it healthy, make sure to provide adequate water and fertilize regularly. You should also control pests and prune and train the plant to promote healthy growth. Harvest at the right time to ensure the highest quality fiber.')
-            
+            # Display image
+            st.image(image, caption='Uploaded Image', use_column_width=True)
+            # Make prediction
+            label, score = predict(image)
+            # Display prediction
+            st.write('Prediction: {} (confidence score: {:.2f}%)'.format(label, score*100))
+            # Provide instructions based on prediction
+            if label == 'diseased':
+                st.write('Your cotton plant appears to be diseased. To prevent the spread of disease, you should remove the infected plant and treat the soil. You can also consult a local agricultural expert for advice on how to prevent future outbreaks of disease.')
+            else:
+                st.write('Your cotton plant appears to be healthy. To keep it healthy, make sure to provide adequate water and fertilize regularly. You should also control pests and prune and train the plant to promote healthy growth. Harvest at the right time to ensure the highest quality fiber.')
+          
 # Run Streamlit app
 if __name__ == '__main__':
     main()

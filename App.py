@@ -1,21 +1,22 @@
 #!/usr/bin/env python
 import streamlit as st
+import numpy as np
+from PIL import Image
+import tensorflow as tf
 import requests
 from io import BytesIO
-from PIL import Image
-import numpy as np
-import tensorflow as tf
 
-# Load pre-trained model
-model_detect = tf.keras.models.load_model('v3_pred_cott_dis.h5')
+# Load pre-trained models
+leaf_model = tf.keras.models.load_model('v3_pred_cott_leaf.h5')
+img_model = tf.keras.applications.ResNet50(weights='imagenet')
 
 # Define labels for prediction output
-labels = ['diseased', 'healthy']
+leaf_labels = ['diseased','healthy']
 
-# Define function to preprocess input image
-def preprocess_image(image):
+# Define function to preprocess input image for leaf model
+def preprocess_leaf_image(image):
     # Resize image
-    image = image.resize((150, 150))
+    image = image.resize((150,150))
     # Convert image to numpy array
     image = np.array(image)
     # Scale pixel values to range [0, 1]
@@ -24,14 +25,37 @@ def preprocess_image(image):
     image = np.expand_dims(image, axis=0)
     return image
 
-# Define function to make prediction on input image
+# Define function to preprocess input image for img model
+def preprocess_img(image):
+    # Resize image
+    image = image.resize((224,224))
+    # Convert image to numpy array
+    image = np.array(image)
+    # Expand dimensions to create batch of size 1
+    image = np.expand_dims(image, axis=0)
+    # Preprocess image
+    image = tf.keras.applications.resnet50.preprocess_input(image)
+    return image
+
+# Define function to classify image using pre-trained img model
+def classify_image(image):
+    # Preprocess input image
+    image = preprocess_img(image)
+    # Make prediction using pre-trained model
+    prediction = img_model.predict(image)
+    # Get predicted class index
+    predicted_class = tf.keras.applications.resnet50.decode_predictions(prediction, top=1)[0][0][1]
+    # Return predicted class
+    return predicted_class
+
+# Define function to make prediction on input image using leaf model
 def predict(image):
     # Preprocess input image
-    image = preprocess_image(image)
+    image = preprocess_leaf_image(image)
     # Make prediction using pre-trained model
-    prediction = model_detect.predict(image)
+    prediction = leaf_model.predict(image)
     # Convert prediction from probabilities to label
-    label = labels[np.argmax(prediction)]
+    label = leaf_labels[np.argmax(prediction)]
     # Return label and confidence score
     return label, prediction[0][np.argmax(prediction)]
 
@@ -47,18 +71,23 @@ def main():
     if uploaded_file is not None:
         # Load image
         image = Image.open(uploaded_file)
-        # Display image
-        st.image(image, caption='Uploaded Image', use_column_width=True)
-        # Make prediction
-        label, score = predict(image)
-        # Display prediction
-        st.write('Prediction: {} (confidence score: {:.2f})'.format(label, score))
-        
-        # Provide instructions based on prediction
-        if label == 'diseased':
-            st.write('Your cotton plant appears to be diseased. To prevent the spread of disease, you should remove the infected plant and treat the soil. You can also consult a local agricultural expert for advice on how to prevent future outbreaks of disease.')
+        # Check if the image is actually a cotton plant
+        predicted_class = classify_image(image)
+        if 'cotton' not in predicted_class:
+            st.write("Error: Please upload an appropriate image of a cotton plant.")
         else:
-            st.write('Your cotton plant appears to be healthy. To keep it healthy, make sure to provide adequate water and fertilize regularly. You should also control pests and prune and train the plant to promote healthy growth. Harvest at the right time to ensure the highest quality fiber.')
+            # Display image
+            st.image(image, caption='Uploaded Image', use_column_width=True)
+            # Make prediction
+            label, score = predict(image)
+            # Display prediction
+            st.write('Prediction: {} (confidence score: {:.2f})'.format(label, score))
+        
+            # Provide instructions based on prediction
+            if label == 'diseased':
+                st.write('Your cotton plant appears to be diseased. To prevent the spread of disease, you should remove the infected plant and treat the soil. You can also consult a local agricultural expert for advice on how to prevent future outbreaks of disease.')
+            else:
+                st.write('Your cotton plant appears to be healthy. To keep it healthy, make sure to provide adequate water and fertilize regularly. You should also control pests and prune and train the plant to promote healthy growth. Harvest at the right time to ensure the highest quality fiber.')
 
 # Run Streamlit app
 if __name__ == '__main__':

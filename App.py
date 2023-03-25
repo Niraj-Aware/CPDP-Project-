@@ -51,7 +51,7 @@ def main():
         # Make prediction
         label, score = predict(image)
         # Display prediction
-        st.write('Prediction: {} (confidence score: {:.2f})'.format(label, score))
+        st.write('Prediction: {} (confidence score: {:.2%})'.format(label, score))
         
         # Provide instructions based on prediction
         if label == 'diseased':

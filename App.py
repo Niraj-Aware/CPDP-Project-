@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+#!/usr/bin/env python
+
 import streamlit as st
 import numpy as np
 from PIL import Image
@@ -9,7 +11,15 @@ import tensorflow as tf
 model = tf.keras.models.load_model('v3_pred_cott_dis.h5')
 
 # Define labels for prediction output
-labels = ['diseased','healthy']
+labels = ['diseased', 'diseased_ang', 'diseased_bac', 'diseased_mic', 'diseased_mild', 'healthy']
+
+# Define names of cotton diseases
+disease_names = {
+    'diseased_ang': 'Angular Leaf Spot',
+    'diseased_bac': 'Bacterial Blight',
+    'diseased_mic': 'Microbial Blight',
+    'diseased_mild': 'Mildew',
+}
 
 # Define function to preprocess input image
 def preprocess_image(image):
@@ -31,8 +41,14 @@ def predict(image):
     prediction = model.predict(image)
     # Convert prediction from probabilities to label
     label = labels[np.argmax(prediction)]
-    # Return label and confidence score
-    return label, prediction[0][np.argmax(prediction)]
+    # If label is 'diseased', return name of disease
+    if label == 'diseased':
+        sublabel = labels[1:][np.argmax(prediction[0][1:])]
+        disease_name = disease_names.get(sublabel, sublabel)
+        return disease_name, prediction[0][np.argmax(prediction)]
+    # If label is 'healthy', return label and confidence score
+    else:
+        return label, prediction[0][np.argmax(prediction)]
 
 # Define Streamlit app
 def main():
@@ -52,12 +68,12 @@ def main():
         # Make prediction
         label, score = predict(image)
         # Check if the predicted label is either 'healthy' or 'diseased'
-        if label in labels:
+        if label in ['diseased', 'healthy']:
             # Display prediction
             st.write('Prediction: {} (confidence score: {:.2%})'.format(label, score))
             # Provide instructions based on prediction
             if label == 'diseased':
-                st.write('Your cotton plant appears to be diseased. To prevent the spread of disease, you should remove the infected plant and treat the soil. You can also consult a local agricultural expert for advice on how to prevent future outbreaks of disease.')
+                st.write('Your cotton plant appears to have {} disease. To prevent the spread of disease, you should remove the infected plant and treat the soil. You
             else:
                 st.write('Your cotton plant appears to be healthy. To keep it healthy, make sure to provide adequate water and fertilize regularly. You should also control pests and prune and train the plant to promote healthy growth. Harvest at the right time to ensure the highest quality fiber.')
         else:

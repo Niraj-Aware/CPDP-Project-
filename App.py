@@ -9,14 +9,13 @@ import tensorflow as tf
 model = tf.keras.models.load_model('v3_pred_cott_dis.h5')
 
 # Define labels for prediction output
-labels = ['diseased', 'diseased_ang', 'diseased_bac', 'diseased_mic', 'diseased_mild', 'healthy']
-
-# Define names of cotton diseases
-disease_names = {
-    'diseased_ang': 'Angular Leaf Spot',
-    'diseased_bac': 'Bacterial Blight',
-    'diseased_mic': 'Microbial Blight',
-    'diseased_mild': 'Mildew',
+labels = {
+    0: 'Alternaria Alternata',
+    1: 'Anthracnose',
+    2: 'Bacterial Blight',
+    3: 'Corynespora Leaf Fall',
+    4: 'Healthy',
+    5: 'Grey Mildew'
 }
 
 # Define function to preprocess input image
@@ -39,21 +38,15 @@ def predict(image):
     prediction = model.predict(image)
     # Convert prediction from probabilities to label
     label = labels[np.argmax(prediction)]
-    # If label is 'diseased', return name of disease
-    if label == 'diseased':
-        sublabel = labels[1:][np.argmax(prediction[0][1:])]
-        disease_name = disease_names.get(sublabel, sublabel)
-        return disease_name, prediction[0][np.argmax(prediction)]
-    # If label is 'healthy', return label and confidence score
-    else:
-        return label, prediction[0][np.argmax(prediction)]
+    # Return label and confidence score
+    return label, prediction[0][np.argmax(prediction)]
 
 # Define Streamlit app
 def main():
     # Set app title
     st.title('Cotton Plant Disease Detection')
     # Set app description
-    st.write('This app helps you to detect whether a cotton plant is healthy or diseased.')
+    st.write('This app helps you to detect the type of disease in a cotton plant.')
     st.write('NOTE- This model only works on Cotton Plant. (With appropriate Image)')
     # Add file uploader for input image
     uploaded_file = st.file_uploader('Choose an image', type=['jpg', 'jpeg', 'png'])
@@ -65,18 +58,23 @@ def main():
         st.image(image, caption='Uploaded Image', use_column_width=True)
         # Make prediction
         label, score = predict(image)
-        # Check if the predicted label is either 'healthy' or 'diseased'
-        if label in ['diseased', 'healthy']:
+        # Check if the predicted label is a disease
+        if label != 'Healthy':
             # Display prediction
             st.write('Prediction: {} (confidence score: {:.2%})'.format(label, score))
-            # Provide instructions based on prediction
-            if label == 'diseased':
-                st.write('Your cotton plant appears to have {} disease. To prevent the spread of disease, you should remove the infected plant and treat the soil. You
+            # Provide information about the disease
+            if label == 'Alternaria Alternata':
+                st.write('The cotton plant is infected with Alternaria Alternata, a fungal disease that can cause leaf spot and boll rot. Treatment options include removing infected plant parts and using fungicides.')
+            elif label == 'Anthracnose':
+                st.write('The cotton plant is infected with Anthracnose, a fungal disease that can cause leaf spots, stem cankers, and boll rot. Treatment options include removing infected plant parts and using fungicides.')
+            elif label == 'Bacterial Blight':
+                st.write('The cotton plant is infected with Bacterial Blight, a bacterial disease that can cause water-soaked spots on leaves, stems, and bolls. Treatment options include removing infected plant parts and using bactericides.')
+            elif label == 'Corynespora Leaf Fall':
+                st.write('The cotton plant is infected with Corynespora Leaf Fall, a fungal disease that can cause leaf spots and defoliation. Treatment options include removing infected plant parts and using fungicides.')
             else:
-                st.write('Your cotton plant appears to be healthy. To keep it healthy, make sure to provide adequate water and fertilize regularly. You should also control pests and prune and train the plant to promote healthy growth. Harvest at the right time to ensure the highest quality fiber.')
+                st.write('The cotton plant is infected with Grey Mildew, a fungal disease that can cause leaf spots and defoliation. Treatment options include removing infected plant parts and using fungicides.')
         else:
-            st.write('The uploaded image is not appropriate for this app.')
-            
-# Run Streamlit app
-if __name__ == '__main__':
-    main()
+            st.write("The cotton plant is healthy. No treatment is needed.")
+
+if name == 'main':
+main()

@@ -76,5 +76,5 @@ def main():
         else:
             st.write("The cotton plant is healthy. No treatment is needed.")
 
-if name == 'main':
+if __name__ == __'main'__:
     main()

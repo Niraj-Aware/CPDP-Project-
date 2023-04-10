@@ -77,4 +77,4 @@ def main():
             st.write("The cotton plant is healthy. No treatment is needed.")
 
 if name == 'main':
-main()
+    main()

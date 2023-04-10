@@ -1,7 +1,5 @@
 #!/usr/bin/env python
 
-#!/usr/bin/env python
-
 import streamlit as st
 import numpy as np
 from PIL import Image

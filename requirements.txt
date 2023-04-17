@@ -3,3 +3,4 @@ tensorflow
 streamlit
 image
 Pillow
+pymongo

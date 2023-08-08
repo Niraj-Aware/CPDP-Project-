@@ -1,3 +1,4 @@
+pip install tensorflow_hub
 import streamlit as st
 from PIL import Image
 import tensorflow as tf

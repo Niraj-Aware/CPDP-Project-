@@ -27,6 +27,7 @@ if uploaded_image is not None:
 
     # Display disease prediction
     st.subheader("Disease Prediction:")
-    st.write("Predicted Class:", tomato_classes[np.argmax(prediction)])
-    st.write("Confidence:", prediction[0][np.argmax(prediction)])
-    
+    predicted_class = tomato_classes[np.argmax(prediction)]
+    confidence = prediction[0][np.argmax(prediction)]
+    st.write("Predicted Class:", predicted_class)
+    st.write("Confidence:", confidence)

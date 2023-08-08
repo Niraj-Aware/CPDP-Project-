@@ -1,17 +1,19 @@
 import streamlit as st
 from PIL import Image
 import tensorflow as tf
+import tensorflow_hub as hub
 import numpy as np
 
-# Load the pre-trained model for tomato leaf disease detection
-tomato_model = tf.keras.models.load_model('v3_pred_tomato_dis.h5')
+# Load the pre-trained model from TensorFlow Hub
+model_url = "https://tfhub.dev/google/plant_village/classifier/corn_disease_V1/2"
+model = hub.load(model_url)
 
-# Define classes for tomato leaf diseases
-tomato_classes = ["Healthy", "Diseased"]
+# Define classes for plant diseases
+classes = ["Healthy", "Diseased"]
 
-st.title("Tomato Leaf Disease Detection")
+st.title("Plant Disease Detection")
 
-uploaded_image = st.file_uploader("Choose a tomato leaf image...", type=["jpg", "png"])
+uploaded_image = st.file_uploader("Choose a plant leaf image...", type=["jpg", "png"])
 
 if uploaded_image is not None:
     image = Image.open(uploaded_image)
@@ -23,11 +25,12 @@ if uploaded_image is not None:
     image = np.expand_dims(image, axis=0)  # Add batch dimension
 
     # Make prediction using the model
-    prediction = tomato_model.predict(image)
+    prediction = model.predict(image)
 
     # Display disease prediction
     st.subheader("Disease Prediction:")
-    predicted_class = tomato_classes[np.argmax(prediction)]
+    predicted_class = classes[np.argmax(prediction)]
     confidence = prediction[0][np.argmax(prediction)]
     st.write("Predicted Class:", predicted_class)
     st.write("Confidence:", confidence)
+    

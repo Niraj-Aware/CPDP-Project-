@@ -4,12 +4,12 @@ import tensorflow as tf
 import numpy as np
 
 # Load pre-trained models
-tomato_model = tf.keras.models.load_model('tomato_model.h5')
+#tomato_model = tf.keras.models.load_model('tomato_model.h5')
 cotton_model = tf.keras.models.load_model('cotton_model.h5')
 corn_model = tf.keras.models.load_model('corn_model.h5')
 
 # Define classes for diseases
-tomato_classes = ["Healthy", "Diseased"]
+#tomato_classes = ["Healthy", "Diseased"]
 cotton_classes = ["Healthy", "Diseased"]
 corn_classes = ["Healthy", "Diseased"]
 
@@ -27,13 +27,13 @@ if uploaded_image is not None:
     image = np.expand_dims(image, axis=0)  # Add batch dimension
 
     # Make predictions using the models
-    tomato_prediction = tomato_model.predict(image)
+    #tomato_prediction = tomato_model.predict(image)
     cotton_prediction = cotton_model.predict(image)
     corn_prediction = corn_model.predict(image)
 
     # Display disease predictions
     st.subheader("Disease Predictions:")
-    st.write("Tomato:", tomato_classes[np.argmax(tomato_prediction)])
+    #st.write("Tomato:", tomato_classes[np.argmax(tomato_prediction)])
     st.write("Cotton:", cotton_classes[np.argmax(cotton_prediction)])
     st.write("Corn:", corn_classes[np.argmax(corn_prediction)])
   

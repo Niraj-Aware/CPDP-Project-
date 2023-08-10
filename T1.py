@@ -5,8 +5,7 @@ import tensorflow_hub as hub
 import numpy as np
 
 # Load the pre-trained model from TensorFlow Hub
-model_url = "https://tfhub.dev/google/plant_village/classifier/corn_disease_V1/2"
-model = hub.load(model_url)
+model = tf.keras.models.load_model('model.h5')
 
 # Define classes for plant diseases
 classes = ["Healthy", "Diseased"]

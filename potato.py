@@ -4,7 +4,7 @@ import numpy as np
 import tensorflow as tf
 
 # Load the pre-trained model
-model = tf.keras.models.load_model('potato_disease_model.h5')
+model = tf.keras.models.load_model('potatoDisease.h5')
 
 # Define disease class names
 class_names = ['Potato Early Blight', 'Potato Late Blight', 'Healthy']

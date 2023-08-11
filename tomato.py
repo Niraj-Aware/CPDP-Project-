@@ -25,11 +25,11 @@ labels = [
 # Define function to preprocess input image
 def preprocess_image(image):
     # Resize image
-    image = image.resize((250, 250))
+    image = image.resize((150, 150))
     # Convert image to numpy array
     image = np.array(image)
     # Scale pixel values to range [0, 1]
-    image = image / 250
+    image = image / 255
     # Expand dimensions to create batch of size 1
     image = np.expand_dims(image, axis=0)
     return image

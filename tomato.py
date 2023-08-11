@@ -6,7 +6,7 @@ from PIL import Image
 import tensorflow as tf
 
 # Load pre-trained model
-model = tf.keras.models.load_model('v3_pred_tomato_dis.h5')  # Replace with your tomato disease detection model
+model = tf.keras.models.load_model('tomato.h5')  # Replace with your tomato disease detection model
 
 # Define labels for prediction output
 labels = [

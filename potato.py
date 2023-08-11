@@ -1,48 +1,61 @@
+#!/usr/bin/env python
+
 import streamlit as st
 import numpy as np
 from PIL import Image
 import tensorflow as tf
 
 # Load pre-trained model
-model = tf.keras.models.load_model('model.h5')
+model = tf.keras.models.load_model('potatoDisease.h5')
 
 # Define labels for prediction output
 labels = {
-    0: 'Potato___Early_blight',
-    1: 'Potato___Late_blight',
+    0: 'Potato___Late_blight',
+    1: 'Potato___Early_blight',
     2: 'Potato___healthy',
 }
 
-# Preprocess the input image
+# Define function to preprocess input image
 def preprocess_image(image):
-    img = image.resize((224, 224))  # Resize to match the input shape expected by the model
-    img = np.array(img) / 255.0     # Normalize pixel values to [0, 1]
-    img = np.expand_dims(img, axis=0)  # Add batch dimension
-    return img
+    # Resize image
+    image = image.resize((150, 150))
+    # Convert image to numpy array
+    image = np.array(image)
+    # Scale pixel values to range [0, 1]
+    image = image / 150
+    # Expand dimensions to create a batch of size 1
+    image = np.expand_dims(image, axis=0)
+    return image
 
-# Function to predict disease
-def predict_disease(image):
-    preprocessed_img = preprocess_image(image)
-    prediction = model.predict(preprocessed_img)
-    predicted_class = np.argmax(prediction)
-    confidence = prediction[0][predicted_class] * 100
-    return class_names[predicted_class], confidence
+# Define function to make a prediction on the input image
+def predict(image):
+    # Preprocess the input image
+    image = preprocess_image(image)
+    # Make a prediction using the pre-trained model
+    prediction = model.predict(image)
+    # Convert the prediction from probabilities to a label
+    label = labels[np.argmax(prediction)]
+    # Return the label and confidence score
+    return label, prediction[0][np.argmax(prediction)]
 
-# Streamlit app
+# Define the Streamlit app
 def main():
-    st.title("Potato Disease Detection")
-    st.write("Upload an image of a potato leaf to detect the disease.")
+    # Set app title
+    st.title('Potato Disease Detection')
+    # Set app description
+    st.write('This app helps you to detect the type of disease in a potato plant.')
+    # Add file uploader for input image
+    uploaded_file = st.file_uploader('Choose an image', type=['jpg', 'jpeg', 'png'])
+    # If a file is uploaded, display it and make a prediction
+    if uploaded_file is not None:
+        # Load the image
+        image = Image.open(uploaded_file)
+        # Display the image
+        st.image(image, caption='Uploaded Image', use_column_width=True)
+        # Make a prediction
+        label, score = predict(image)
+        # Display prediction
+        st.write('Prediction: {} (confidence score: {:.2%})'.format(label, score))
 
-    uploaded_image = st.file_uploader("Choose an image...", type=["jpg", "jpeg", "png"])
-
-    if uploaded_image is not None:
-        image = Image.open(uploaded_image)
-        st.image(image, caption="Uploaded Image", use_column_width=True)
-
-        if st.button("Predict"):
-            predicted_class, confidence = predict_disease(image)
-            st.write(f"Predicted Disease: {predicted_class}")
-            st.write(f"Confidence: {confidence:.2f}%")
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()

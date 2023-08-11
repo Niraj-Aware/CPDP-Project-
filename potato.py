@@ -6,7 +6,7 @@ import tensorflow as tf
 from tensorflow.keras.models import load_model
 
 # Load the pre-trained model
-model = load_model('/kaggle/working/model.h5')
+model = load_model('model.h5')
 class_names = ['Potato___Early_blight', 'Potato___Late_blight', 'Potato___healthy']
 
 # Preprocess the input image

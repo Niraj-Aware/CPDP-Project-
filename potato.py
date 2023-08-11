@@ -2,11 +2,16 @@ import streamlit as st
 import numpy as np
 from PIL import Image
 import tensorflow as tf
-from tensorflow.keras.models import load_model
 
-# Load the pre-trained model
-model = load_model('model.h5')
-class_names = ['Potato___Early_blight', 'Potato___Late_blight', 'Potato___healthy']
+# Load pre-trained model
+model = tf.keras.models.load_model('model.h5')
+
+# Define labels for prediction output
+labels = {
+    0: 'Potato___Early_blight',
+    1: 'Potato___Late_blight',
+    2: 'Potato___healthy',
+}
 
 # Preprocess the input image
 def preprocess_image(image):

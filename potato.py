@@ -1,20 +1,22 @@
+#!/usr/bin/env python
 import streamlit as st
-from PIL import Image
 import numpy as np
+from PIL import Image
 import tensorflow as tf
+from tensorflow.keras.models import load_model
 
 # Load the pre-trained model
-model = tf.keras.models.load_model('potatoDisease.h5')
+model = load_model('potatoDisease.h5')
+class_names = ['Potato___Early_blight', 'Potato___Late_blight', 'Potato___healthy']
 
-# Define disease class names
-class_names = ['Potato Early Blight', 'Potato Late Blight', 'Healthy']
-
+# Preprocess the input image
 def preprocess_image(image):
-    img = image.resize((150, 150))
-    img = np.array(img) / 255.0
-    img = np.expand_dims(img, axis=0)
+    img = image.resize((224, 224))  # Resize to match the input shape expected by the model
+    img = np.array(img) / 255.0     # Normalize pixel values to [0, 1]
+    img = np.expand_dims(img, axis=0)  # Add batch dimension
     return img
 
+# Function to predict disease
 def predict_disease(image):
     preprocessed_img = preprocess_image(image)
     prediction = model.predict(preprocessed_img)
@@ -23,16 +25,20 @@ def predict_disease(image):
     return class_names[predicted_class], confidence
 
 # Streamlit app
-st.title('Potato Disease Detection')
+def main():
+    st.title("Potato Disease Detection")
+    st.write("Upload an image of a potato leaf to detect the disease.")
 
-uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "png", "jpeg"])
+    uploaded_image = st.file_uploader("Choose an image...", type=["jpg", "jpeg", "png"])
 
-if uploaded_file is not None:
-    image = Image.open(uploaded_file)
-    st.image(image, caption='Uploaded Image', use_column_width=True)
-    st.write("")
+    if uploaded_image is not None:
+        image = Image.open(uploaded_image)
+        st.image(image, caption="Uploaded Image", use_column_width=True)
 
-    if st.button('Predict'):
-        predicted_class, confidence = predict_disease(image)
-        st.write(f'Prediction: {predicted_class}')
-        st.write(f'Confidence: {confidence:.2f}%')
+        if st.button("Predict"):
+            predicted_class, confidence = predict_disease(image)
+            st.write(f"Predicted Disease: {predicted_class}")
+            st.write(f"Confidence: {confidence:.2f}%")
+
+if __name__ == "__main__":
+    main()
